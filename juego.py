@@ -6,6 +6,9 @@ class Block:
     def __init__(self, pos):
         self.posicion = [pos[0], pos[1]]
         self.numero = rd.choice([2, 4])
+    
+    def __repr__(self):
+        return str(self.numero)
 
 class tablero:
     bloques = []
@@ -19,7 +22,7 @@ class tablero:
         self.casillasocupadas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
         self.casillas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
         for bloque in self.bloques:
-            self.casillas[bloque.posicion[1]][bloque.posicion[0]] = bloque.numero
+            self.casillas[bloque.posicion[1]][bloque.posicion[0]] = bloque
             self.casillasocupadas[bloque.posicion[1]][bloque.posicion[0]] = 1
 
     def imprimir(self):
@@ -31,8 +34,6 @@ class tablero:
     def movement(self, direccion):
         if direccion[0] == -1:
             for bloque in self.bloques:
-#                while bloque.posicion[0] - 1 >= 0 and self.casillasocupadas[bloque.posicion[1]][bloque.posicion[0] -1] == 0:
-#                   bloque.posicion[0] = bloque.posicion[0] - 1
                 cantidad = 0
                 indice = bloque.posicion[0] - 1
                 while indice >= 0:
@@ -44,8 +45,6 @@ class tablero:
         
         if direccion[0] == 1:
             for bloque in self.bloques:
-#                while bloque.posicion[0] + 1 < 4 and self.casillasocupadas[bloque.posicion[1]][bloque.posicion[0]+1] == 0:
-#                   bloque.posicion[0] = bloque.posicion[0] + 1
                 cantidad = 0
                 indice = bloque.posicion[0] + 1
                 while indice < 4:
@@ -56,8 +55,6 @@ class tablero:
 
         if direccion[1] == -1:
             for bloque in self.bloques:
-#                while bloque.posicion[1] + 1 < 4 and self.casillasocupadas[bloque.posicion[1]+1][bloque.posicion[0]] == 0: 
-#                    bloque.posicion[1] = bloque.posicion[1] + 1
                 cantidad = 0
                 indice = bloque.posicion[1] + 1
                 while indice < 4:
@@ -68,8 +65,6 @@ class tablero:
 
         if direccion[1] == 1:
             for bloque in self.bloques:
-#                while bloque.posicion[1] - 1 >= 0 and self.casillasocupadas[bloque.posicion[1]-1][bloque.posicion[0]] == 0:
-#                    bloque.posicion[1] = bloque.posicion[1] - 1
                 cantidad = 0
                 indice = bloque.posicion[1] - 1
                 while indice >= 0:
@@ -78,8 +73,9 @@ class tablero:
                     indice = indice - 1
                 bloque.posicion[1] = 0 + cantidad
 
-    def merge(self, direccion):
-        for bloque in bloques
+    #def merge(self, direccion):
+    #    for bloque in self.bloques:
+    #        if(bloque.)
 
 
     def ciclo(self):
