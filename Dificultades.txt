@@ -1,0 +1,2 @@
+Hector:
+-La principal dificultad que estamos atravesando está relacionada con la implementación de la lógica del juego por si misma. La planeación de la inteligencia que vamos a implementar no ha sido un problema, ya que debido a las entradas que contamos y las posibles salidas se trata de algo relativamente simple. Estamos seguros de que la dificultad va a ser superada pronto (hoy o mañana, a mas tardar)
