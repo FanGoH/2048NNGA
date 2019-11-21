@@ -1,4 +1,6 @@
 import random as rd
+import numpy as np
+import copy as copy
 
 class Block:
     def __init__(self, pos):
@@ -6,16 +8,14 @@ class Block:
         self.numero = rd.choice([2, 4])
     
     def __repr__(self):
-        if self.numero == 0:
-            return "-"
         return str(self.numero)
 
 class tablero:
     bloques = []
     casillas = []
     def __init__(self):
-        self.casillas = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
-        self.casillasocupadas = self.casillas
+        self.casillas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
+        self.casillasocupadas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
         self.bloques.append(Block([rd.choice([0, 1, 2, 3]), rd.choice([0, 1, 2, 3])]))
 
     def actualizar(self):
@@ -32,8 +32,17 @@ class tablero:
         print(self.casillas[3])
 
     def movement(self, direccion):
+        if direccion[0] == 1:
+            stack = sorted(self.bloques, key=lambda x: x.posicion[0], reverse=True)
+        elif direccion[0] == -1:
+            stack = sorted(self.bloques, key=lambda x: x.posicion[0], reverse=False)
+        elif direccion[1] == -1:
+            stack = sorted(self.bloques, key=lambda x: x.posicion[1], reverse=True)
+        elif direccion[1] == 1:
+            stack = sorted(self.bloques, key=lambda x: x.posicion[1], reverse=False)
+
         if direccion[0] == -1:
-            for bloque in self.bloques:
+            for bloque in stack:
                 cantidad = 0
                 indice = bloque.posicion[0] - 1
                 combinar = False
@@ -49,7 +58,7 @@ class tablero:
                     self.merge(direccion, bloque.posicion[0], bloque, bloque2)
         
         if direccion[0] == 1:
-            for bloque in self.bloques:
+            for bloque in stack:
                 cantidad = 0
                 indice = bloque.posicion[0] + 1
                 combinar = False
@@ -65,7 +74,7 @@ class tablero:
                     self.merge(direccion, bloque.posicion[0], bloque, bloque2)
 
         if direccion[1] == -1:
-            for bloque in self.bloques:
+            for bloque in stack:
                 cantidad = 0
                 indice = bloque.posicion[1] + 1
                 combinar = False
@@ -81,7 +90,7 @@ class tablero:
                     self.merge(direccion, bloque.posicion[1], bloque, bloque2)
 
         if direccion[1] == 1:
-            for bloque in self.bloques:
+            for bloque in stack:
                 cantidad = 0
                 indice = bloque.posicion[1] - 1
                 combinar = False
@@ -97,7 +106,7 @@ class tablero:
                     self.merge(direccion, bloque.posicion[1], bloque, bloque2)
 
     def merge(self, direccion, hilera, bloque, bloque2):
-        self.actualizar
+        self.actualizar()
         bloque2.numero = bloque2.numero + bloque.numero
         eje = [bloque.posicion[1] + direccion[1], bloque.posicion[0] - direccion[0]]
         temp = []
@@ -150,6 +159,10 @@ class tablero:
         self.actualizar()
 
     def ciclo(self):
+        self.bloquesbefore = []
+        for bloque in self.bloques:
+            self.bloquesbefore.append(Block(bloque.posicion))
+        
         opc = input("W = Up, A = Left, S = Down, D = Right: ")
         opc = opc.capitalize()
         if opc == 'W':
@@ -161,11 +174,20 @@ class tablero:
         elif opc == 'D':
             self.movement([1, 0])
         valido = False
-        while not valido:
-            nuevo = Block([rd.choice([0,1,2,3]), rd.choice([0,1,2,3])])
-            if self.casillasocupadas[nuevo.posicion[1]][nuevo.posicion[0]] == 0:
-                self.bloques.append(nuevo)
-                valido = True
+        self.actualizar()
+        repetido = True
+        for bloque in self.bloques:
+            for bloque2 in self.bloquesbefore:
+                if bloque.posicion[0] != bloque2.posicion[0] or bloque.posicion[1] != bloque2.posicion[1]:
+                    repetido = False
+
+        if not repetido:                    
+            while not valido:
+                nuevo = Block([rd.choice([0,1,2,3]), rd.choice([0,1,2,3])])
+                if self.casillasocupadas[nuevo.posicion[1]][nuevo.posicion[0]] == 0:
+                    self.bloques.append(nuevo)
+                    valido = True
+
         self.actualizar()
         
 board = tablero()
