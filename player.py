@@ -1,4 +1,4 @@
-import juego
+'''import juego
 import numpy as np 
 
 class NeuralNetwork():
@@ -53,6 +53,6 @@ class Generacion():
 
     def crossover(self):
         np.random.choice(seleccionados)
-
+'''
         
 
