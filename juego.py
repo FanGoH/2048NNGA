@@ -1,7 +1,5 @@
 import random as rd
 import numpy as np
-import copy
-import neat
 
 class Block:
     def __init__(self, pos):
@@ -20,7 +18,10 @@ class tablero:
         self.casillasocupadas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
         self.casillasnumero = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]]
         self.bloques.append(Block([rd.choice([0, 1, 2, 3]), rd.choice([0, 1, 2, 3])]))
-        self.terminado == False
+        self.terminado = False
+        self.actuales = 1
+        self.moved = False
+        self.ganado = False
 
     def actualizar(self):
         self.casillasocupadas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
@@ -47,8 +48,12 @@ class tablero:
         elif direccion[1] == 1:
             stack = sorted(self.bloques, key=lambda x: x.posicion[1], reverse=False)
 
+        n = len(stack)
+        m = 0
+
         if direccion[0] == -1:
             for bloque in stack:
+                m = m + 1
                 cantidad = 0
                 indice = bloque.posicion[0] - 1
                 combinar = False
@@ -56,6 +61,7 @@ class tablero:
                     if self.casillasocupadas[bloque.posicion[1]][indice] == 1:
                         if cantidad == 0 and self.casillas[bloque.posicion[1]][indice].numero == bloque.numero:
                             combinar = True
+                            self.moved = True
                             bloque2 = self.casillas[bloque.posicion[1]][indice]
                         cantidad = cantidad + 1
                     indice = indice - 1
@@ -65,6 +71,7 @@ class tablero:
         
         if direccion[0] == 1:
             for bloque in stack:
+                m = m + 1
                 cantidad = 0
                 indice = bloque.posicion[0] + 1
                 combinar = False
@@ -72,6 +79,7 @@ class tablero:
                     if self.casillasocupadas[bloque.posicion[1]][indice] == 1:
                         if cantidad == 0 and self.casillas[bloque.posicion[1]][indice].numero == bloque.numero:
                             combinar = True
+                            self.moved = True
                             bloque2 = self.casillas[bloque.posicion[1]][indice]
                         cantidad = cantidad + 1
                     indice = indice + 1
@@ -81,6 +89,7 @@ class tablero:
 
         if direccion[1] == -1:
             for bloque in stack:
+                m = m + 1
                 cantidad = 0
                 indice = bloque.posicion[1] + 1
                 combinar = False
@@ -88,6 +97,7 @@ class tablero:
                     if self.casillasocupadas[indice][bloque.posicion[0]] == 1:
                         if cantidad == 0 and self.casillas[indice][bloque.posicion[0]].numero == bloque.numero:
                             combinar = True
+                            self.moved = True
                             bloque2 = self.casillas[indice][bloque.posicion[0]]
                         cantidad = cantidad + 1
                     indice = indice + 1
@@ -97,6 +107,7 @@ class tablero:
 
         if direccion[1] == 1:
             for bloque in stack:
+                m = m + 1
                 cantidad = 0
                 indice = bloque.posicion[1] - 1
                 combinar = False
@@ -104,12 +115,16 @@ class tablero:
                     if self.casillasocupadas[indice][bloque.posicion[0]] == 1:
                         if cantidad == 0 and self.casillas[indice][bloque.posicion[0]].numero == bloque.numero:
                             combinar = True
+                            self.moved = True
                             bloque2 = self.casillas[indice][bloque.posicion[0]]
                         cantidad = cantidad + 1
                     indice = indice - 1
                 bloque.posicion[1] = 0 + cantidad
                 if combinar:
                     self.merge(direccion, bloque.posicion[1], bloque, bloque2)
+        
+        if (m < n):
+            self.moved = True
 
     def merge(self, direccion, hilera, bloque, bloque2):
         self.actualizar()
@@ -162,7 +177,7 @@ class tablero:
                     indice = indice - 1
                 bloque.posicion[1] = 0 + cantidad
 
-
+        self.actuales = self.actuales - 1
         self.score = self.score + bloque2.numero
         self.actualizar()
 
@@ -189,17 +204,48 @@ class tablero:
                 if(bloque not numero):
                     repetido = False'''
 
-        if len(self.bloques) == 15:
-            terminado = True
+        contador = 0
+        for bloque in self.bloques:
+            bloque1 = bloque
+            contador = contador +1
+            if bloque.numero == 2048:
+                self.terminado == True
 
-        if not repetido and not terminado:                    
+        if contador <= 15:
+            self.terminado = True
+
+        contador = 0
+        for i in range(0, 4):
+            for j in range(0, 4):
+                contador = contador + self.casillasocupadas[i][j]
+                
+        if contador >=16:
+            self.terminado = True
+
+        if self.actuales >= 16:
+            self.terminado = True
+
+        contador = 0
+        for i in range(0,4):
+            for j in range(0,4):
+                if self.casillasnumero[i][j] != 0:
+                    contador = contador + 1
+                if self.casillasnumero[i][j] == 2048:
+                    self.ganado = True
+
+        if contador == 15:
+            self.terminado = True 
+
+        if not repetido and not self.terminado:                    
             while not valido:
                 nuevo = Block([rd.choice([0,1,2,3]), rd.choice([0,1,2,3])])
+                self.actuales = self.actuales +1
                 if self.casillasocupadas[nuevo.posicion[1]][nuevo.posicion[0]] == 0:
                     self.bloques.append(nuevo)
                     valido = True
 
         self.actualizar()
+        
         
 def main():
     board = tablero()

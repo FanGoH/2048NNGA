@@ -26,6 +26,7 @@ class tablero:
         self.terminado = False
         self.actuales = 1
         self.moved = False
+        self.ganado = False
 
     def actualizar(self):
         self.casillasocupadas = [[0,0,0,0],[0,0,0,0], [0,0,0,0], [0,0,0,0]] 
@@ -219,15 +220,26 @@ class tablero:
             self.terminado = True
 
         contador = 0
-        for i in range(0, 3):
-            for j in range(0, 3):
+        for i in range(0, 4):
+            for j in range(0, 4):
                 contador = contador + self.casillasocupadas[i][j]
                 
-        if contador >=14:
+        if contador >=16:
             self.terminado = True
 
-        if self.actuales >= 15:
+        if self.actuales >= 16:
             self.terminado = True
+
+        contador = 0
+        for i in range(0,4):
+            for j in range(0,4):
+                if self.casillasnumero[i][j] != 0:
+                    contador = contador + 1
+                if self.casillasnumero[i][j] == 2048:
+                    self.ganado = True
+
+        if contador == 15:
+            self.terminado = True 
 
         if not repetido and not self.terminado:                    
             while not valido:
@@ -259,47 +271,49 @@ def decision(board, indice):
         board.ciclo("D")
 
 def main(genomes, config):
-    nets = []
-    ge = []
+    redes = []
+    colectivo = []
+    ganado = False
         
-    for _, g in genomes:
+    for notuse, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
-        nets.append(net)
+        redes.append(net)
         g.fitness = 0
-        ge.append(g)
+        colectivo.append(g)
 
-    for x, individuo in enumerate(ge):
+    for indice, individuo in enumerate(colectivo):
         ls = 0
         nsls = 0
-        print("--------- Individuo ---------- " + str(x))   
+        print("--------- Individuo ---------- " + str(indice))   
         board = tablero()
-        ge[x].fitness = ge[x].fitness + 0.1
-        individuo = individuo    
-        contador = 10     
-        while board.terminado == False and contador >= 0:
-            move = nets[x].activate((board.casillasnumero[0][0],board.casillasnumero[0][1],board.casillasnumero[0][2],board.casillasnumero[0][3],board.casillasnumero[1][0],board.casillasnumero[1][1],board.casillasnumero[1][2],board.casillasnumero[1][3],board.casillasnumero[2][0],board.casillasnumero[2][1],board.casillasnumero[2][2],board.casillasnumero[2][3],board.casillasnumero[3][0],board.casillasnumero[3][1],board.casillasnumero[3][2],board.casillasnumero[3][3]))
-            #move = nets[x].activate(np.flatten(board.casillas))
-            decision(board, np.argmax(move))  
-            board.imprimir()
-            print("Actuales ocupadas : " + str(board.actuales))
+        colectivo[indice].fitness = colectivo[indice].fitness + 0.1  
+        while board.terminado == False:
+            movimiento = redes[indice].activate((board.casillasnumero[0][0],board.casillasnumero[0][1],board.casillasnumero[0][2],board.casillasnumero[0][3],board.casillasnumero[1][0],board.casillasnumero[1][1],board.casillasnumero[1][2],board.casillasnumero[1][3],board.casillasnumero[2][0],board.casillasnumero[2][1],board.casillasnumero[2][2],board.casillasnumero[2][3],board.casillasnumero[3][0],board.casillasnumero[3][1],board.casillasnumero[3][2],board.casillasnumero[3][3]))
+            decision(board, np.argmax(movimiento))  
+            #board.imprimir() ### Si se descomenta esta linea, se muestran todos los movimientos
             if board.terminado == True: # or not board.moved:
-                ge.pop(x)
-                nets.pop(x)
+                colectivo.pop(indice)
+                redes.pop(indice)
                 break
             if(not (board.score == 0) and not (len(board.bloques) == 0)):
-                ge[x].fitness = log(board.score, 2)
-                ge[x].fitness = log(ge[x].fitness, 2) + log(16,2) - log(len(board.bloques), 2)
-            contador = contador - 1
+                colectivo[indice].fitness = log(board.score, 2)
+                colectivo[indice].fitness = colectivo[indice].fitness + log(16,2) - log(len(board.bloques), 2)
             if ls == board.score:
                 nsls = nsls + 1
             else:
                 nsls = 0
 
             if nsls >= 10:
-                ge.pop(x)
-                nets.pop(x)
+                colectivo.pop(indice)
+                redes.pop(indice)
                 break
             ls = board.score
+        #board.imprimir() ### Si se descomenta esta linea, se muestra el ultimo tablero
+        if (board.ganado):
+            ganado = True
+
+        if (ganado):
+            print("LA RED FUNCIONA, Y TENEMOS AL MENOS UN INDIVIDUO VICTORIOSO")
 
 def run(config_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
@@ -309,9 +323,8 @@ def run(config_path):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-
-    # fitness function, generations
-    mejor_individuo = p.run(main, 10)
+    
+    mejor_individuo = p.run(main, 50)
 
     with open('IAPro.pickle', 'wb') as handle:
         pickle.dump(mejor_individuo, handle)
