@@ -214,7 +214,7 @@ class tablero:
             bloque1 = bloque
             contador = contador +1
             if bloque.numero == 2048:
-                self.terminado == True
+                self.ganado == True
 
         if contador <= 15:
             self.terminado = True
@@ -273,9 +273,9 @@ def decision(board, indice):
 def main(genomes, config):
     redes = []
     colectivo = []
-    ganado = False
         
     for notuse, g in genomes:
+        ganado = False
         net = neat.nn.FeedForwardNetwork.create(g, config)
         redes.append(net)
         g.fitness = 0
